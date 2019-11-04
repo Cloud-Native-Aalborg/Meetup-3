@@ -6,6 +6,8 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Random;
+
 
 @RestController
 @Slf4j
@@ -34,6 +36,12 @@ public class FrontendResource {
 
     @GetMapping("/quote/fail")
     public Quote quoteFail() {
-        throw new FailException();
+        if (new Random().nextBoolean()) {
+            log.warn("Decided to fail");
+            throw new FailException();
+        } else {
+            final String uri = quoteServiceUrl + "/quote/fail";
+            return restTemplateBuilder.build().getForObject(uri, Quote.class);
+        }
     }
 }

@@ -36,6 +36,7 @@ public class QuoteResource {
 
     @GetMapping("/quote/fail")
     public Quote quoteFail() {
+        log.warn("Failed to get quote.");
         throw new FailException();
     }
 
