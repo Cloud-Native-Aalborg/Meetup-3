@@ -11,9 +11,9 @@
     </parent>
 
     <groupId>dk.slyng.meetup</groupId>
-    <artifactId>meetup-3-frontend</artifactId>
+    <artifactId>meetup-3-quote-frontend</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>meetup-3-frontend</name>
+    <name>meetup-3-quote-frontend</name>
 
     <properties>
         <maven.compiler.target>11</maven.compiler.target>
@@ -72,7 +72,7 @@
     </dependencies>
 
     <build>
-        <finalName>meetup-3-frontend</finalName>
+        <finalName>meetup-3-quote-frontend</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

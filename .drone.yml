@@ -1,0 +1,74 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: build-quote-service
+    image: plugins/docker
+    settings:
+      repo: slyngdk/meetup-3-quote-service
+      username:
+        from_secret: docker_hub_username
+      password:
+        from_secret: docker_hub_password
+      dockerfile: quote-service/Dockerfile
+      context: quote-service
+      tags:
+        - latest
+        - 0.0.${DRONE_BUILD_NUMBER}
+
+  - name: build-quote-frontend
+    image: plugins/docker
+    settings:
+      repo: slyngdk/meetup-3-quote-frontend
+      username:
+        from_secret: docker_hub_username
+      password:
+        from_secret: docker_hub_password
+      dockerfile: quote-frontend/Dockerfile
+      context: quote-frontend
+      tags:
+        - latest
+        - 0.0.${DRONE_BUILD_NUMBER}
+
+trigger:
+  branch:
+    - master
+  event:
+    exclude:
+      - tag
+
+---
+
+kind: pipeline
+name: default-build-only
+
+steps:
+  - name: build-quote-service
+    image: plugins/docker
+    settings:
+      repo: slyngdk/meetup-3-quote-service
+      dry_run: true
+      username:
+        from_secret: docker_hub_username
+      password:
+        from_secret: docker_hub_password
+      dockerfile: quote-service/Dockerfile
+      context: quote-service
+      tags:
+        - latest
+        - 0.0.${DRONE_BUILD_NUMBER}
+
+  - name: build-quote-frontend
+    image: plugins/docker
+    settings:
+      repo: slyngdk/meetup-3-quote-frontend
+      dry_run: true
+      username:
+        from_secret: docker_hub_username
+      password:
+        from_secret: docker_hub_password
+      dockerfile: quote-frontend/Dockerfile
+      context: quote-frontend
+      tags:
+        - latest
+        - 0.0.${DRONE_BUILD_NUMBER}

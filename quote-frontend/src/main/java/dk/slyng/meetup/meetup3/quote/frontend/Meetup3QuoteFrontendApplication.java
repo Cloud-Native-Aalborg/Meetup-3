@@ -1,13 +1,13 @@
-package dk.slyng.meetup.meetup3.frontend;
+package dk.slyng.meetup.meetup3.quote.frontend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Meetup3FrontendApplication {
+public class Meetup3QuoteFrontendApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Meetup3FrontendApplication.class, args);
+        SpringApplication.run(Meetup3QuoteFrontendApplication.class, args);
     }
 
 

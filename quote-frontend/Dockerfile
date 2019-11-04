@@ -17,4 +17,4 @@ WORKDIR /application
 
 COPY --from=build target/*.jar /application
 
-CMD java -jar /application/meetup-3-frontend.jar
+CMD java -jar /application/meetup-3-quote-frontend.jar

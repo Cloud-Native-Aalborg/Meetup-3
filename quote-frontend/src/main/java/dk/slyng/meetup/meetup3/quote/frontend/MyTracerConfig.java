@@ -1,4 +1,4 @@
-package dk.slyng.meetup.meetup3.frontend;
+package dk.slyng.meetup.meetup3.quote.frontend;
 
 import io.jaegertracing.internal.JaegerTracer;
 import io.opentracing.contrib.java.spring.jaeger.starter.TracerBuilderCustomizer;

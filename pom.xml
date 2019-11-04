@@ -10,7 +10,7 @@
 
 
     <modules>
-        <module>frontend</module>
+        <module>quote-frontend</module>
         <module>quote-service</module>
     </modules>
 </project>

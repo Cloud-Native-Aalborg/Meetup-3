@@ -1,4 +1,4 @@
-package dk.slyng.meetup.meetup3.frontend;
+package dk.slyng.meetup.meetup3.quote.frontend;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
