@@ -7,7 +7,7 @@ RUN mvn -B org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline
 
 #copy the rest and build it
 COPY src src
-RUN mvn package spring-boot:repackage -DskipTests
+RUN mvn package spring-boot:repackage
 
 FROM openjdk:11
 
