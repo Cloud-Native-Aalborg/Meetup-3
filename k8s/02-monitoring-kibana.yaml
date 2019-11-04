@@ -12,3 +12,23 @@ spec:
     logging:
       silent: true
       json: true
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/enable-access-log: "false"
+  name: kibana
+  namespace: monitoring
+spec:
+  rules:
+    - host: kibana.monitoring.172.20.30.21.xip.io
+      http:
+        paths:
+          - backend:
+              serviceName: monitoring-kb-http
+              servicePort: 5601
+  tls:
+    - hosts:
+        - kibana.monitoring.172.20.30.21.xip.io

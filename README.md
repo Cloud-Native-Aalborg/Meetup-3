@@ -51,9 +51,9 @@ Add Kibana configuration:
 kubectl apply -f k8s/02-monitoring-kibana.yaml
 ```
 
-## 6. Setup Filebeat (Log Collector)
+## 5. Setup Filebeat (Log Collector)
 
-### 6.1 Added filebeat role to elasticsearch
+### 5.1 Added filebeat role to elasticsearch
 ```
 # Run from the developer console in kibana
 POST /_security/role/filebeat_writer
@@ -69,7 +69,7 @@ POST /_security/role/filebeat_writer
 
 GET /_security/role/filebeat_writer
 ```
-### 6.2 Added filebeat user to elasticsearch
+### 5.2 Added filebeat user to elasticsearch
 ```
 # Run from the developer console in kibana
 POST /_security/user/filebeat_internal
@@ -82,12 +82,12 @@ POST /_security/user/filebeat_internal
 GET /_security/user/filebeat_internal
 ```
 
-### 6.3 Add Filebeat daemonset
+### 5.3 Add Filebeat daemonset
 ```bash
 kubectl apply -f k8s/03-monitoring-filebeat.yaml
 ```
 
-## 7. Setup nginx ingress to do logging in json (Without tracing)
+## 6. Setup nginx ingress to do logging in json (Without tracing)
 
 Example of `nginx-configuration` configmap, that can be used to do nginx access/error logging in json.
 ```yaml
@@ -129,11 +129,11 @@ metadata:
   name: nginx-configuration
 ```
 
-# 
 
-##8. Setup Jaeger from https://github.com/Cloud-Native-Aalborg/Meetup-2/blob/master/k8s/jaeger/jaeger-all-in-one-template.yml
-+ ElasticSearch Config
-###8.1 Add jaeger role to elasticsearch
+##7. Setup Jaeger
+Setting up jaeger with elasticsearch as storage.
+
+###7.1 Add Jaeger role to elasticsearch
 ```
 # Run from the developer console in kibana
 POST /_security/role/jaeger
@@ -169,7 +169,7 @@ POST /_security/role/jaeger
 GET /_security/role/jaeger
 ```
 
-### 8.2 Add jaeger user to elasticsearch
+### 7.2 Add Jaeger user to elasticsearch
 ```
 # Run from the developer console in kibana
 POST /_security/user/jaeger
@@ -184,7 +184,13 @@ POST /_security/user/jaeger
 }
 GET /_security/user/jaeger
 ```
-#### 8.3 Enable opentracing on nginx ingress
+### 7.3 Setup Jaeger
+
+```bash
+kubectl apply -f k8s/03-monitoring-filebeat.yaml
+```
+
+#### 7.4 Enable opentracing on nginx ingress
 Example of `nginx-configuration` configmap, that can be used to do nginx access/error logging in json, with tracing enabled.
 ```yaml
 apiVersion: v1
@@ -234,4 +240,15 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
   name: nginx-configuration
+```
+
+## 8 Deploy quote-service
+
+```bash
+kubectl apply -f k8s/10-default-quote-service.yaml
+```
+## 9 Deploy quote-frontend
+
+```bash
+kubectl apply -f k8s/11-default-quote-frontend.yaml
 ```

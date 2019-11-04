@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: quote-service
+  name: quote-service
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quote-service
+  template:
+    metadata:
+      labels:
+        app: quote-service
+    spec:
+      containers:
+        - env:
+            - name: JAEGER_HOST
+              value: jaeger-agent.monitoring
+          image: slyngdk/meetup-3-quote-service
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 2
+          name: quote-service
+          ports:
+            - containerPort: 8081
+              name: 8081tcp80812
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 2
+            timeoutSeconds: 2
+          resources:
+            limits:
+              memory: 400Mi
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: quote-service
+  namespace: default
+spec:
+  selector:
+    app: quote-service
+  ports:
+    - name: default
+      port: 8081
+      protocol: TCP
+      targetPort: 8081

@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: quote-frontend
+  name: quote-frontend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quote-frontend
+  template:
+    metadata:
+      labels:
+        app: quote-frontend
+    spec:
+      containers:
+        - env:
+            - name: JAEGER_HOST
+              value: jaeger-agent.monitoring
+            - name: QUOTE_SERVICE
+              value: http://quote-service:8081
+          image: slyngdk/meetup-3-quote-frontend
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 2
+          name: quote-frontend
+          ports:
+            - containerPort: 8080
+              name: 8080tcp8080
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 2
+            successThreshold: 2
+            timeoutSeconds: 2
+          resources:
+            limits:
+              memory: 400Mi
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: quote-frontend
+  namespace: default
+spec:
+  selector:
+    app: quote-frontend
+  ports:
+    - name: default
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: quote-frontend
+  namespace: default
+spec:
+  rules:
+    - host: quote-frontend.default.172.20.30.21.xip.io
+      http:
+        paths:
+          - backend:
+              serviceName: quote-frontend
+              servicePort: 8080
