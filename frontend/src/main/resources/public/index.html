@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quote-frontend</title>
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
+
+    <style>
+        body, html {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="container h-100">
+    <div class="row align-items-center h-100">
+        <div class="col-12 mx-auto">
+            <div class="jumbotron jumbotron-fluid text-center" style="background:transparent !important">
+                <p class="lead text-left">Random quote</p>
+                <h1 class="display-4" id="quote"></h1>
+                <p class="lead text-right" id="author"></p>
+                <br/>
+                <p class="lead text-right">
+                    <a class="btn btn-primary btn-lg" href="#" id="newButton" role="button">Get new quote</a>
+                    <a class="btn btn-danger btn-lg" href="#" id="failButton" role="button">Get failing quote</a>
+                </p>
+                <p class="lead text-center" id="traceId"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script crossorigin="anonymous"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+<script src="/main.js"></script>
+</body>
+</html>

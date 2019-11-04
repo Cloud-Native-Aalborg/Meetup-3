@@ -1,0 +1,214 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: filebeat
+  name: filebeat
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: filebeat
+  name: filebeat
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+    verbs:
+      - get
+      - watch
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: filebeat
+  labels:
+    app: filebeat
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: filebeat
+subjects:
+  - kind: ServiceAccount
+    name: filebeat
+    namespace: monitoring
+---
+apiVersion: v1
+data:
+  filebeat.yml: |-
+    filebeat.config:
+      inputs:
+        # Mounted `filebeat-inputs` configmap:
+        path: ${path.config}/inputs.d/*.yml
+        # Reload inputs configs as they change:
+        reload.enabled: false
+      modules:
+        path: ${path.config}/modules.d/*.yml
+        # Reload module configs as they change:
+        reload.enabled: false
+
+    logging:
+      level: warning
+      json: true
+
+    setup.template.name: "filebeat"
+    setup.template.pattern: "filebeat-*"
+    setup.template.settings:
+      index.number_of_shards: 5
+      index.number_of_replicas: 2
+    setup.ilm.enabled: false
+    output.elasticsearch:
+      hosts: ['https://${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
+      ssl.certificate_authorities: ["/usr/share/filebeat/ca.crt"]
+      username: ${ELASTICSEARCH_USERNAME}
+      password: ${ELASTICSEARCH_PASSWORD}
+      index: "filebeat-%{+yyyy.MM}"<
+kind: ConfigMap
+metadata:
+  labels:
+    app: filebeat
+  name: filebeat-config
+  namespace: monitoring
+---
+apiVersion: v1
+data:
+  kubernetes.yml: |-
+    - type: log
+      paths:
+        - "/var/log/containers/*.log"
+      json.add_error_key: true
+      symlinks: true
+      json.message_key: "log"
+      processors:
+        - decode_json_fields:
+            target: ""
+            fields: ["json.log"]
+        - add_kubernetes_metadata:
+            in_cluster: true
+            default_matchers.enabled: false
+            matchers:
+            - logs_path:
+                logs_path: /var/log/containers/
+        - timestamp:
+            field: json.time
+            layouts:
+              - '2006-01-02T15:04:05.999999999Z07:00'
+            ignore_missing: true
+            ignore_failure: true
+kind: ConfigMap
+metadata:
+  labels:
+    app: filebeat
+  name: filebeat-inputs
+  namespace: monitoring
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: filebeat
+  name: filebeat
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+        - args:
+            - -e
+          env:
+            - name: ELASTICSEARCH_HOST
+              value: monitoring-es-http # ElasticSearch k8s service
+            - name: ELASTICSEARCH_PORT
+              value: "9200"
+            - name: ELASTICSEARCH_USERNAME
+              value: filebeat_internal
+            - name: ELASTICSEARCH_PASSWORD
+              value: filebeat-internal-password
+          image: docker.elastic.co/beats/filebeat:7.4.0
+          imagePullPolicy: IfNotPresent
+          name: filebeat
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          securityContext:
+            capabilities: {}
+            procMount: Default
+            runAsUser: 0
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /usr/share/filebeat/filebeat.yml
+              name: config
+              readOnly: true
+              subPath: filebeat.yml
+            - mountPath: /var/log/containers
+              name: varlogcontainers
+              readOnly: true
+            - mountPath: /var/log/pods
+              name: varlogpods
+              readOnly: true
+            - mountPath: /var/lib/docker/containers
+              name: varlibdockercontainers
+              readOnly: true
+            - mountPath: /usr/share/filebeat/inputs.d
+              name: inputs
+              readOnly: true
+            - mountPath: /usr/share/filebeat/data
+              name: data
+            - mountPath: /usr/share/filebeat/ca.crt
+              name: esca
+              readOnly: true
+              subPath: ca.crt
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      serviceAccount: filebeat
+      serviceAccountName: filebeat
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 384
+            name: filebeat-config
+          name: config
+        - hostPath:
+            path: /var/log/containers
+            type: ""
+          name: varlogcontainers
+        - hostPath:
+            path: /var/log/pods
+            type: ""
+          name: varlogpods
+        - hostPath:
+            path: /var/lib/docker/containers
+            type: ""
+          name: varlibdockercontainers
+        - configMap:
+            defaultMode: 384
+            name: filebeat-inputs
+          name: inputs
+        - hostPath:
+            path: /var/lib/filebeat-data
+            type: DirectoryOrCreate
+          name: data
+        - secret:
+            defaultMode: 384
+            secretName: monitoring-es-http-certs-public
+          name: esca
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
